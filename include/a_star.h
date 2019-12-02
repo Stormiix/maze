@@ -65,6 +65,7 @@ void reconstructPath(PtrMap<T> &come_from, T* best, int dist)
     // list from start to end
     std::reverse(summary.begin(),summary.end());
 
+    // BUG HERE
     for(auto &elem: summary)
     {
         if(come_from.get(elem))

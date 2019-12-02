@@ -3,7 +3,8 @@
 
 using namespace std;
 using namespace ecn;
-
+using std::cout;
+using std::endl;
 // a node is a x-y position, we move from 1 each time
 class Position : public Point
 {
@@ -26,14 +27,14 @@ public:
     {
         // this method should return  all positions reachable from this one
         std::vector<PositionPtr> generated;
-        for (int i = -1; i <= 1; i++)
+
+        int dx[] = {-1, 0, 1, 0}; 
+        int dy[] = {0, 1, 0, -1};
+
+        for (int i = 0; i < 4; i++)
         {
-            for (int j = -1; j <= 1; j++){
-                if(!(i == 0 && j == 0)){ // Skip current point
-                    if(Position::maze.isFree(x+i, y+j)){
-                        generated.push_back(std::make_unique<Position>(x+i, y+j));
-                    }
-                } 
+            if(Position::maze.isFree(x+dx[i], y+dy[i])){
+                generated.push_back(std::make_unique<Position>(x+dx[i], y+dy[i]));
             }
         }
 

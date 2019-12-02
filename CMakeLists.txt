@@ -18,8 +18,8 @@ target_link_libraries(maze ${OpenCV_LIBS})
 add_executable(generator src/generator.cpp)
 target_link_libraries(generator maze)
 
-#add_executable(line src/solve_line.cpp)
-#target_link_libraries(line maze)
+add_executable(line src/solve_line.cpp)
+target_link_libraries(line maze)
 
 add_executable(cell src/solve_cell.cpp)
 target_link_libraries(cell  maze)
