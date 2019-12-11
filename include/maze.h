@@ -106,7 +106,7 @@ public:
         if(show)
         {
             display("Maze", out);
-            cv::waitKey(0);
+            cv::waitKey(1);
         }
     }
 

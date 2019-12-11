@@ -27,9 +27,8 @@ public:
     {
         // this method should return  all positions reachable from this one
         std::vector<PositionPtr> generated;
-
-        int dx[] = {-1, 0, 1, 0}; 
-        int dy[] = {0, 1, 0, -1};
+        std::vector<int> dx{-1, 0, 1, 0};
+        std::vector<int> dy{0, 1, 0, -1};
 
         for (int i = 0; i < 4; i++)
         {

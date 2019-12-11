@@ -24,5 +24,5 @@ target_link_libraries(line maze)
 add_executable(cell src/solve_cell.cpp)
 target_link_libraries(cell  maze)
 
-#add_executable(corridor src/solve_corridor.cpp)
-#target_link_libraries(corridor maze)
+add_executable(corridor src/solve_corridor.cpp)
+target_link_libraries(corridor maze)

@@ -1,8 +1,7 @@
-#include "../include/maze.h"
-#include "../include/point.h"
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <maze.h>
 
 typedef struct
 {
@@ -14,6 +13,7 @@ typedef struct
 
 std::vector<Node> nodes; //Nodes array
 int width, height;       //Maze dimensions
+int percentage(0);
 
 int init()
 {
@@ -142,21 +142,6 @@ Node *link(Node *n)
     return (Node *)n->parent;
 }
 
-void draw()
-{
-    int i, j;
-
-    //Outputs maze to terminal - nothing special
-    for (i = 0; i < height; i++)
-    {
-        for (j = 0; j < width; j++)
-        {
-            printf("%c", nodes.at(j + i * width).c);
-        }
-        printf("\n");
-    }
-}
-
 void generateMaze(ecn::Maze &maze)
 {
     int width = maze.width();
@@ -173,12 +158,17 @@ void generateMaze(ecn::Maze &maze)
         ;
     int i, j;
 
-    for (i = 0; i < height; i++)
+    for (i = 1; i < height-1; i++)
     {
-        for (j = 0; j < width; j++)
+        for (j = 1; j < width-1; j++)
         {
-            if(nodes.at(j + i * width).c != '#'){
+            if (nodes.at(j + i * width).c != '#')
+            {
                 maze.dig(j, i);
+            }
+
+            if( (rand() % 100) < percentage && nodes.at(j + i * width).c == '#'){
+                maze.dig(j,i);
             }
         }
     }
@@ -215,6 +205,14 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    sscanf( argv[3], "%d", &percentage );
+
+    if (percentage < 0 || percentage > 100)
+    {
+        fprintf(stderr, "%s: Percentage must be from 0 -> 100!\n", argv[0]);
+        exit(1);
+    }
+
     //Seed random generator
     srand(time(NULL));
 
@@ -226,6 +224,6 @@ int main(int argc, char **argv)
     }
 
     ecn::Maze maze(height, width);
-    generateMaze(maze),
+    generateMaze(maze);
     maze.save();
 }

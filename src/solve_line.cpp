@@ -16,125 +16,66 @@ public:
     // constructor from base ecn::Point
     Position(ecn::Point p) : Point(p.x, p.y) {}
 
-    Position(int _x, int _y, int distance) : Point(_x, _y) {}
+    Position(int _x, int _y, int dist) : Point(_x, _y) {
+        distance = dist;
+    }
 
     int distToParent()
     {
         return distance;
     }
-
-    bool isXCorridor(int x, int y) const {
-        return !isFree(x, y+1) && !isFree(x, y-1);
-    }
-
-    bool isYCorridor(int x, int y) const {
-        return !isFree(x+1, y) && !isFree(x-1, y);
-    }
-    bool isCorridor(int x, int y) const {
-        return isXCorridor(x,y) || isYCorridor(x,y);
-    }
-    bool isFree(int x, int y) const {
+    bool isFree(int x, int y) const
+    {
         return Position::maze.isFree(x, y);
-    }
+    } 
 
-    int freeCompassCells(int x, int y) const {
+    int freeNeighboors(int x, int y){
         int counter = 0;
-        for (int i = -1; i <= 1; i++)
+        int cx;
+        int cy;
+        for (int i = 0; i < 4; i++)
         {
-            for (int j = -1; j <= 1; j++)
-            {
-                if(i!=j){
-                    counter += isFree(x+i,y+j) ? 1 : 0;
-                }
+            cx = x + dx[i];
+            cy = y + dy[i];
+            if(isFree(cx,cy)){
+                counter++;
             }
         }
         return counter;
     }
-    bool isCorner(int x, int y) const {
-        bool is = false;
-        // TR
-        if(isFree(x,y+1) && isFree(x+1,y)){
-            is = true;
-        }
-        // TL
-        if(isFree(x,y+1) && isFree(x-1,y)){
-            is = true;
-        }
-        // BR
-        if(isFree(x,y-1) && isFree(x+1,y)){
-            is = true;
-        }
-        // BL
-        if(isFree(x,y-1) && isFree(x+1,y)){
-            is = true;
-        }  
-        return is;
-    }
-    bool isIntersection(int x, int y) const {
-        return freeCompassCells(x,y) >= 3;
-    }
-    bool isDeadend(int x, int y) const {
-        return freeCompassCells(x,y) == 1;
-    }
-    bool isChild(int cx, int cy) const {
-        return isCorner(cx, cy) || isIntersection(cx, cy) || isDeadend(cx,cy);
+
+    bool isCorridor(int x, int y){
+        return freeNeighboors(x,y) == 2;
     }
     std::vector<PositionPtr> children()
     {
         // this method should return  all positions reachable from this one
         std::vector<PositionPtr> generated;
-        std::cout << "---------------------------------- " << std::endl; 
-        std::cout << "Currently at "<< x << "," << y << std::endl; 
         int cx;
         int cy;
-        for (int i = -1; i <= 1; i++)
+        for (int i = 0; i < 4; i++)
         {
-            for (int j = -1; j <= 1; j++)
+            cx = x + dx[i];
+            cy = y + dy[i];
+            if (isFree(cx , cy))
             {
-                // Follow corridor
-                cx = x+i;
-                cy = y+j;
-                std::cout << "Checking at "<< cx << "," << cy << " | Free: " << isFree(x+i,y+j) << std::endl; 
-                if(i!=j && isFree(x+i,y+j)){
-                    std::cout << "Going at "<< cx << "," << cy << std::endl; 
-                    if(isCorridor(cx, cy)){
-                        while(isCorridor(cx, cy)){
-                            std::cout << "Following a corridor at "<< cx << "," << cy << std::endl; 
-                            int xStep = 0;
-                            int yStep = 0;
-                            if(isXCorridor(cx,cy) && !isCorner(cx, cy) && !isIntersection(cx, cy) && !isDeadend(cx, cy) && i!=0){
-                                xStep = isFree(cx + i, cy) ? i : isFree(cx - i, cy) ? -i : 0;
-                            }
-                            if(isYCorridor(cx,cy) && !isCorner(cx, cy) && !isIntersection(cx, cy) && !isDeadend(cx, cy)  && j!=0){
-                                yStep = isFree(cx, cy+j) ? j : isFree(cx, cy-j) ? -j : 0;
-                            }
-                            
-                            if(xStep == yStep && xStep == 0){
-                                break;
-                            }
-                            cx += xStep;
-                            cy += yStep;
-                            if(isChild(cx,cy)){
-                                std::cout << "Found at "<< cx << "," << cy << std::endl; 
-                                if(isFree(cx, cy)){
-                                    generated.push_back(std::make_unique<Position>(cx,cy, sqrt(pow(cx-x, 2) + pow(cy-y, 2))));
-                                }
-                                break;
-                            }
-                        }
-                    }else if(isCorner(cx, cy) || isIntersection(cx, cy) || isDeadend(cx,cy)){
-                        std::cout << "Found at "<< cx << "," << cy << std::endl; 
-                        if(isFree(cx, cy)){
-                            generated.push_back(std::make_unique<Position>(cx,cy, sqrt(pow(cx-x, 2) + pow(cy-y, 2))));
-                        }
+                while(isCorridor(cx, cy)){
+                    if(isFree(cx + dx[i], cy +dy[i])){
+                        cx += dx[i];
+                        cy += dy[i];
+                    }else{
+                        break;
                     }
-
                 }
+                generated.push_back(std::make_unique<Position>(cx, cy, Point(cx, cy).h(Point(x,y), use_manhattan))); // TODO: use h()
             }
         }
         return generated;
     }
-    int distance;
+    bool use_manhattan = true;
+    int distance = 0; 
+    std::vector<int> dx{-1, 0, 1, 0};
+    std::vector<int> dy{0, 1, 0, -1};
 };
 
 int main(int argc, char **argv)
@@ -155,6 +96,6 @@ int main(int argc, char **argv)
     ecn::Astar(start, goal);
 
     // save final image
-    Position::maze.saveSolution("cell");
+    Position::maze.saveSolution("line");
     cv::waitKey(0);
 }
