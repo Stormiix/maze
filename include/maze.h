@@ -110,10 +110,13 @@ public:
         }
     }
 
-    void save()
+    void save(bool show = true)
     {
         cv::imwrite("../mazes/maze.png", im);
-        display("Maze", im);
+        if(show)
+        {
+            display("Maze", im);
+        }
     }
 
     void saveSolution(std::string suffix)

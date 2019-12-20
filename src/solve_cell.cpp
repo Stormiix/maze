@@ -32,7 +32,7 @@ public:
 
         for (int i = 0; i < 4; i++)
         {
-            if(Position::maze.isFree(x+dx[i], y+dy[i])){
+            if(Position::maze.isFree(x+dx[i], y+dy[i])){ // Store every free neighboring cells
                 generated.push_back(std::make_unique<Position>(x+dx[i], y+dy[i]));
             }
         }
@@ -60,5 +60,5 @@ int main(int argc, char **argv)
 
     // save final image
     Position::maze.saveSolution("cell");
-    cv::waitKey(0);
+    cv::waitKey(1);
 }

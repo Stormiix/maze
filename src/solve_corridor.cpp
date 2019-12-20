@@ -15,6 +15,7 @@ public:
     // constructor from base ecn::Point
     Position(ecn::Point p) : Point(p.x, p.y) {}
 
+    // constructor that also stores the distance
     Position(int _x, int _y, int dist) : Point(_x, _y)
     {
         distance = dist;
@@ -27,7 +28,7 @@ public:
         int sy = startPoint.y;
         std::vector<Point> visitedCells;
         for (int k = 0; k < 4; k++)
-        {
+        { // This function follows the same algorithm as the children method, but stores all the intermediate steps too
             visitedCells.clear();
             int offsetX = dx[k];
             int offsetY = dy[k];
@@ -35,16 +36,16 @@ public:
             int cy = y + offsetY;
             if (isFree(cx, cy))
             {
-                visitedCells.push_back(Point(cx, cy));
+                visitedCells.push_back(Point(cx, cy)); // Keep a record of cells we went through.
                 while (isCorridor(cx, cy, offsetX, offsetY) && (cx != sx || cy != sy))
                 {
                     cx += offsetX;
                     cy += offsetY;
-                    visitedCells.push_back(Point(cx, cy));
+                    visitedCells.push_back(Point(cx, cy)); // Keep a record of cells we went through.
                 }
                 if (cx == parent.x && cy == parent.y)
                 {
-                    for (const auto &p : visitedCells)
+                    for (const auto &p : visitedCells) // Re-trace our path
                     {
                         maze.passThrough(p.x, p.y);
                     }
@@ -57,7 +58,7 @@ public:
 
     // online print, color depends on closed / open set
     void show(bool closed, const Point &parent)
-    {
+    { // This function follows the same algorithm as the children method, but stores all the intermediate steps too
         const int b = closed ? 255 : 0, r = closed ? 0 : 255;
         int sx = startPoint.x;
         int sy = startPoint.y;
@@ -72,16 +73,16 @@ public:
 
             if (isFree(cx, cy))
             {
-                visitedCells.push_back(Point(cx, cy));
+                visitedCells.push_back(Point(cx, cy)); // Store the intermediate steps
                 while (isCorridor(cx, cy, offsetX, offsetY) && (cx != sx || cy != sy))
                 {
                     cx += offsetX;
                     cy += offsetY;
-                    visitedCells.push_back(Point(cx, cy));
+                    visitedCells.push_back(Point(cx, cy)); // Store the intermediate steps
                 }
                 if (cx == parent.x && cy == parent.y)
                 {
-                    for (const auto &p : visitedCells)
+                    for (const auto &p : visitedCells) // Re-trace our path once we find the parent cell
                     {
                         maze.write(p.x, p.y, r, 0, b, false);
                     }
@@ -92,12 +93,12 @@ public:
         maze.write(x, y, r, 0, b);
     }
 
-    int distToParent()
+    int distToParent() // Position.distance getter
     {
-        return distance;
+        return distance; 
     }
 
-    bool isFree(int x, int y) const
+    bool isFree(int x, int y) const // Check if the cell is free
     {
         return Position::maze.isFree(x, y);
     }
@@ -105,16 +106,17 @@ public:
     bool isCorridor(int x, int y, int &dx, int &dy)
     {
         if (dx && (int)isFree(x + dx, y) + (int)isFree(x, y + 1) + (int)isFree(x, y - 1) == 1)
-        {
+        { // If it's an horizontal corridor
+            // Check if we reached a corner and update the direction accordingly to follow the new corridor
             dy = isFree(x, y + 1) ? 1 : isFree(x, y - 1) ? -1 : dy;
-            dx = isFree(x, y + 1) || isFree(x, y - 1) ? 0 : dx;
-            return true;
+            dx = isFree(x, y + 1) || isFree(x, y - 1) ? 0 : dx; // Don't run through the wall after passing the corner
+            return true; // We're still in a corridor
         }
         else if (dy && (int)isFree(x, y + dy) + (int)isFree(x + 1, y) + (int)isFree(x - 1, y) == 1)
-        {
+        { // If it's a vertical corridor do the same checks and follow the new corridor
             dy = isFree(x - 1, y) || isFree(x + 1, y) ? 0 : dy;
             dx = isFree(x-1,y) ? -1 : isFree(x+1, y) ? 1 : dx;
-            return true;
+            return true; // We're still in a corridor
         }
         return false;
     }
@@ -133,8 +135,8 @@ public:
 
             if (isFree(cx, cy))
             {
-                while (isCorridor(cx, cy, offsetX, offsetY) && (cx != ex || cy != ey))
-                {
+                while (isCorridor(cx, cy, offsetX, offsetY) && (cx != ex || cy != ey)) 
+                { // As long as we're in a corridor and we haven't reached our goal, keep moving
                     cx += offsetX;
                     cy += offsetY;
                 }
@@ -143,15 +145,15 @@ public:
         }
         return generated;
     }
-    static void setInterestPositions(Position s, Position e){
+    static void setInterestPositions(Position s, Position e){ // Store the start and end points
         startPoint = s;
         endPoint = e;
     }
-    int distance = 0;
-    bool use_manhattan = true;
-    std::vector<int> dx{-1, 0, 1, 0};
+    int distance = 0; // Holds the distance from the parent for each Positing instance
+    bool use_manhattan = true; // Defines what type of distance we're using
+    std::vector<int> dx{-1, 0, 1, 0}; // dx & dy serve as helpers to calculate the North - South - East - West neighbors
     std::vector<int> dy{0, 1, 0, -1};
-    static Point startPoint, endPoint;
+    static Point startPoint, endPoint; // Keep a record of the start/goal position
 };
 Point Position::startPoint, Position::endPoint;
 
@@ -174,5 +176,5 @@ int main(int argc, char **argv)
 
     // save final image
     Position::maze.saveSolution("corridor");
-    cv::waitKey(0);
+    cv::waitKey(1);
 }

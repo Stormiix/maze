@@ -20,16 +20,17 @@ public:
         distance = dist;
     }
 
-    int distToParent()
+    int distToParent() // Position.distance getter
     {
-        return distance;
+        return distance; 
     }
-    bool isFree(int x, int y) const
+
+    bool isFree(int x, int y) const // Check if the cell is free
     {
         return Position::maze.isFree(x, y);
-    } 
+    }
 
-    int freeNeighboors(int x, int y){
+    int freeNeighboors(int x, int y){ // Calculate the number of free neighbors
         int counter = 0;
         int cx;
         int cy;
@@ -44,9 +45,10 @@ public:
         return counter;
     }
 
-    bool isCorridor(int x, int y){
+    bool isCorridor(int x, int y){ // A cell in a corridor has two free neighbors (corners do too, but we check that later in the loop)
         return freeNeighboors(x,y) == 2;
     }
+    
     std::vector<PositionPtr> children()
     {
         // this method should return  all positions reachable from this one
@@ -60,21 +62,21 @@ public:
             if (isFree(cx , cy))
             {
                 while(isCorridor(cx, cy)){
-                    if(isFree(cx + dx[i], cy +dy[i])){
+                    if(isFree(cx + dx[i], cy +dy[i])){ // This assures that we're only going through corridors and not corners (since they also have 2 free neighbors)
                         cx += dx[i];
                         cy += dy[i];
                     }else{
                         break;
                     }
                 }
-                generated.push_back(std::make_unique<Position>(cx, cy, Point(cx, cy).h(Point(x,y), use_manhattan))); // TODO: use h()
+                generated.push_back(std::make_unique<Position>(cx, cy, Point(cx, cy).h(Point(x,y), use_manhattan)));
             }
         }
         return generated;
     }
-    bool use_manhattan = true;
-    int distance = 0; 
-    std::vector<int> dx{-1, 0, 1, 0};
+    int distance = 0; // Holds the distance from the parent for each Positing instance
+    bool use_manhattan = true; // Defines what type of distance we're using
+    std::vector<int> dx{-1, 0, 1, 0}; // dx & dy serve as helpers to calculate the North - South - East - West neighbors
     std::vector<int> dy{0, 1, 0, -1};
 };
 
@@ -97,5 +99,5 @@ int main(int argc, char **argv)
 
     // save final image
     Position::maze.saveSolution("line");
-    cv::waitKey(0);
+    cv::waitKey(1);
 }

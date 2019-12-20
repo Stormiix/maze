@@ -1,2 +1,2 @@
-show 1
+show 0
 use_manhattan 1

@@ -3,6 +3,12 @@
 #include <utility>
 #include <maze.h>
 
+/*
+  When I re-implemented the C code I had replaced the arrays with std::vectors
+  In hindsight, it's clear that it was uneccessary, though it spared me the overhead of seg faults everywhere.
+*/
+
+
 typedef struct
 {
     int x, y;     //Node position - little waste of memory, but it allows faster generation
